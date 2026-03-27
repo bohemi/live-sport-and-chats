@@ -9,6 +9,8 @@ function ChatRoom() {
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [scoreData, setScoreData] = useState([]);
 
+  const env = import.meta.env;
+
   const ws = useRef(null);
 
   const navigate = useNavigate();
@@ -20,7 +22,7 @@ function ChatRoom() {
     const localUsername = username || localStorage.getItem("username");
     const localRoom = room || localStorage.getItem("room");
 
-    const socket = new WebSocket("ws://localhost:5000");
+    const socket = new WebSocket(env.VITE_WS_URL);
     ws.current = socket;
 
     socket.onopen = handleOpen(socket, localUsername, localRoom);
