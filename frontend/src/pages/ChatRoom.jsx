@@ -60,7 +60,7 @@ function ChatRoom() {
   }
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col w-screen h-screen">
       <div className=" text-right dropdown dropdown-end">
         <div tabIndex={0} role="button" className="btn m-1">
           Menu
@@ -74,12 +74,12 @@ function ChatRoom() {
           </li>
         </ul>
       </div>
-      <div className="grid grid-rows-2 h-screen">
+      <div className="grid h-screen">
         <ScoreWindow scoreData={scoreData} />
-        <div className="flex border justify-between">
+        <div className="flex border">
           <PublicMessage
             sendPublicMessage={handleSendPublicMessage}
-            storeMessages={storeMessages}
+            getMessages={storeMessages}
             username={username}
           />
           <LiveWindow onlineUsers={onlineUsers} />

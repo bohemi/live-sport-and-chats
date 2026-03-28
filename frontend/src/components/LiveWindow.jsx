@@ -1,6 +1,6 @@
 function LiveWindow({ onlineUsers }) {
   return (
-    <div className="border-l p-2 w-1/3">
+    <div className="border-l p-2 flex-1">
       <h1 className="border-b text-center">Live Users-{onlineUsers.length}</h1>
       <ul>
         {onlineUsers.map((user, index) => (

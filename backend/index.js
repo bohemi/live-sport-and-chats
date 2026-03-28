@@ -31,7 +31,7 @@ let rooms = {
 setInterval(async () => {
   // cricket
   if (rooms.cricket.length > 0) {
-    console.log("getting live");
+    console.log("getting live score every 10 seconds");
     const cricketScore = await getLiveCricketScore(process.env.CRICKET_URL);
 
     rooms.cricket.forEach((user) => {
@@ -46,7 +46,7 @@ setInterval(async () => {
       }
     });
   }
-}, 5000);
+}, 10000);
 
 wss.on("connection", (client) => {
   client.send(JSON.stringify("From server: Connected!"));
@@ -81,17 +81,16 @@ wss.on("connection", (client) => {
         time: getTime(),
         id: randomUUID(),
       };
+
       rooms[data.room].push(newuser);
       const user = rooms[data.room].find((u) => u.socket === client);
-
+      console.log("Stored:", user.username, "in", data.room);
       // ------ storing user detials in their socket ---------
-      // so we dont have to do the expensive searching on every room to find which user
-      // left the server.
+      // so we dont have to search every room to find which user left.
       client.user = {
         username: newuser.username,
         room: newuser.room,
       };
-      console.log("Stored:", newuser.username, "in", data.room);
 
       handleMessages(user, data.type);
       getPreviousMessagesFromDB(20, user);
@@ -107,9 +106,6 @@ wss.on("connection", (client) => {
       };
       handleMessages(user, data.type);
       storeMessagesInDB(user.username, user.message, user.room, user.time);
-
-      //temp
-      // getScores();
     }
   });
   // handle error
@@ -135,23 +131,6 @@ wss.on("connection", (client) => {
   });
 });
 
-async function getScores() {
-  console.log("getting live");
-  const cricketScore = await getLiveCricketScore(process.env.CRICKET_URL);
-
-  rooms.cricket.forEach((user) => {
-    if (user.socket.readyState === 1) {
-      user.socket.send(
-        JSON.stringify({
-          type: "score",
-          room: "cricket",
-          scoreData: cricketScore,
-        }),
-      );
-    }
-  });
-}
-
 async function handleMessages(user, type, historyChats) {
   if (!user || !type) {
     console.error("error in handleMessage.", "user:", user, " type:", type);
@@ -167,6 +146,8 @@ async function handleMessages(user, type, historyChats) {
       time: user.time,
       onlineUsers: rooms[user.room].map((u) => u.username),
     });
+    // the new user will geet instant live score first
+    sendLiveScoreOnJoining(user);
   }
   if (type == "chat") {
     broadCast({
@@ -277,6 +258,23 @@ function mongooseStatus() {
   db.on("close", () => {
     console.log("MongoDB connection closed.");
   });
+}
+
+async function sendLiveScoreOnJoining(user) {
+  if (!user) {
+    console.log("error user type");
+    return;
+  }
+  const cricketScore = await getLiveCricketScore(process.env.CRICKET_URL);
+  console.log("sending first instant scores");
+
+  user.socket.send(
+    JSON.stringify({
+      type: "score",
+      room: "cricket",
+      scoreData: cricketScore,
+    }),
+  );
 }
 
 function getTime() {

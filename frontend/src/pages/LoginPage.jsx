@@ -5,10 +5,10 @@ export default function LoginPage() {
   const [username, setuserName] = useState("");
   const [password, setpassword] = useState("");
   const [room, setRoom] = useState("");
-  
+  const [disableLogInAndSignup, setDisableLogInAndSignup] = useState(false);
+
   const navigate = useNavigate();
-  
-  // getOrRemoveLocalStorage("get")
+
   const env = import.meta.env;
 
   const handleSubmit = async (ev) => {
@@ -18,24 +18,38 @@ export default function LoginPage() {
       return;
     }
 
-    const res = await fetch(env.VITE_LOGIN_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ username, password }),
-    });
+    setDisableLogInAndSignup(true);
 
-    const data = await res.json();
+    try {
+      const res = await fetch(env.VITE_LOGIN_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, password }),
+      });
 
-    if (data.success) {
-      navigate("/chatroom", { state: { username, room } });
+      
+      if (!res.ok) {
+        throw new Error(
+          `Server Error: ${res.status}. The server might still be waking up.`,
+        );
+      }
+      const data = await res.json();
 
-      localStorage.setItem("username", username);
-      localStorage.setItem("room", room);
-      localStorage.setItem("token", data.token);
-    } else {
-      alert(data.message);
+      if (data.success) {
+        navigate("/chatroom", { state: { username, room } });
+
+        localStorage.setItem("username", username);
+        localStorage.setItem("room", room);
+        localStorage.setItem("token", data.token);
+      } else {
+        alert(data.message);
+        setDisableLogInAndSignup(false);
+      }
+    } catch (error) {
+      alert(`connection failed: ${error.message}. server might be down`);
+      setDisableLogInAndSignup(false);
     }
   };
 
@@ -92,7 +106,11 @@ export default function LoginPage() {
             /> */}
           </div>
 
-          <button type="submit" className="btn btn-neutral mt-4">
+          <button
+            type="submit"
+            className="btn btn-neutral mt-4"
+            disabled={disableLogInAndSignup}
+          >
             Login
           </button>
 
@@ -101,11 +119,22 @@ export default function LoginPage() {
             onClick={() => navigate("/signup")}
             type="button"
             className="btn underline"
+            disabled={disableLogInAndSignup}
           >
             Sign Up
           </button>
         </fieldset>
       </form>
+      <div className=" mt-2">
+        {disableLogInAndSignup ? (
+          <p className="text-center">
+            Please wait the server might take 10-20 seconds to respond for the
+            first time
+          </p>
+        ) : (
+          ""
+        )}
+      </div>
     </div>
   );
 }

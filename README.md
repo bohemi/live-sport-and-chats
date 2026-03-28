@@ -11,11 +11,11 @@ Live Score Integration: Backend-driven score updates pushed to all connected cli
 Session Management: Persistent user identification (implemented via JWT) to track active participants in the chat.
 
 🛠️ Tech Stack
-Frontend: React.js, Tailwind CSS, WebSocket.
+Frontend: React.js, daisyUi, Tailwind CSS.
 
 Backend: Node.js, Express.js.
 
-Real-time Engine: Socket.io (WebSockets).
+Real-time Engine: ws (WebSocket library).
 
 Database: MongoDB (for chat history and user profiles).
 

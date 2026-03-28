@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 
-
 export default function SignUpPage() {
   const [username, setuserName] = useState("");
   const [password, setpassword] = useState("");
   const [room, setRoom] = useState("");
-  
+  const [disableLogInAndSignup, setDisableLogInAndSignup] = useState(false);
+
   const navigate = useNavigate();
   const env = import.meta.env;
 
@@ -16,24 +16,39 @@ export default function SignUpPage() {
       alert("Please fill/select all the details");
       return;
     }
-    const res = await fetch(env.VITE_SIGNUP_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ username, password }),
-    });
 
-    const data = await res.json();
+    setDisableLogInAndSignup(true);
 
-    if (data.success) {
-      navigate("/chatroom", { state: { username, room } });
+    try {
+      const res = await fetch(env.VITE_SIGNUP_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, password }),
+      });
 
-      localStorage.setItem("username", username);
-      localStorage.setItem("room", room);
-      localStorage.setItem("token", data.token);
-    } else {
-      alert(data.message);
+      if (!res.ok) {
+        throw new Error(
+          `Server Error: ${res.status}. The server might still be waking up.`,
+        );
+      }
+
+      const data = await res.json();
+
+      if (data.success) {
+        navigate("/chatroom", { state: { username, room } });
+
+        localStorage.setItem("username", username);
+        localStorage.setItem("room", room);
+        localStorage.setItem("token", data.token);
+      } else {
+        alert(data.message);
+        setDisableLogInAndSignup(false);
+      }
+    } catch (error) {
+      alert(`connection failed: ${error.message}. server might be down`);
+      setDisableLogInAndSignup(false);
     }
   };
 
@@ -90,13 +105,19 @@ export default function SignUpPage() {
             /> */}
           </div>
 
-          <button type="submit" className="btn btn-neutral mt-4">
+          <button
+            type="submit"
+            className="btn btn-neutral mt-4"
+            disabled={disableLogInAndSignup}
+          >
             Create
           </button>
 
           <p className="m-auto">or</p>
+
           <button
             onClick={() => navigate("/")}
+            disabled={disableLogInAndSignup}
             type="button"
             className="btn underline"
           >

@@ -3,7 +3,7 @@ function ScoreWindow({ scoreData }) {
     return (
       <div className="border-t p-4 w-full text-center">
         <h2 className="text-xl font-bold mb-2">Live Cricket</h2>
-        <p>No live match right now</p>
+        <p>Please wait...</p>
       </div>
     );
   }
@@ -22,25 +22,40 @@ function ScoreWindow({ scoreData }) {
   };
 
   return (
-    <div className="flex flex-col justify-between border-t p-4 w-full">
+    <div className="flex flex-col sm:justify-between border-t p-4">
       <p className="text-xl font-bold mb-4 text-center">Live Cricket</p>
 
-        <p className="text-lg font-semibold">{scoreData.match}</p>
+      <p className="text-lg text-center font-semibold">{scoreData.match}</p>
       <div className="grid grid-cols-2 flex flex-col gap-2 pt-2">
-
         {/* team left */}
         <div className="border p-2">
-        <p><strong>Ining:</strong> {leftTeam.inning}</p>
-        <p><strong>Run:</strong> {leftTeam.run}</p>
-        <p><strong>Wicket:</strong> {leftTeam.wicket}</p>
-        <p><strong>Over:</strong> {leftTeam.over}</p>
+          <p>
+            <strong>Ining:</strong> {leftTeam.inning}
+          </p>
+          <p>
+            <strong>Run:</strong> {leftTeam.run}
+          </p>
+          <p>
+            <strong>Wicket:</strong> {leftTeam.wicket}
+          </p>
+          <p>
+            <strong>Over:</strong> {leftTeam.over}
+          </p>
         </div>
         {/* team right */}
         <div className="border p-2">
-        <p><strong>Ining:</strong> {rightTeam.inning}</p>
-        <p><strong>Run:</strong> {rightTeam.run}</p>
-        <p><strong>Wicket:</strong> {rightTeam.wicket}</p>
-        <p><strong>Over:</strong> {rightTeam.over}</p>
+          <p>
+            <strong>Ining:</strong> {rightTeam.inning}
+          </p>
+          <p>
+            <strong>Run:</strong> {rightTeam.run}
+          </p>
+          <p>
+            <strong>Wicket:</strong> {rightTeam.wicket}
+          </p>
+          <p>
+            <strong>Over:</strong> {rightTeam.over}
+          </p>
         </div>
       </div>
       <p className="text-center border">Status: {scoreData.status || "Live"}</p>
