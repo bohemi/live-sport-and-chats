@@ -14,7 +14,7 @@ export default function LoginPage() {
   const handleSubmit = async (ev) => {
     ev.preventDefault();
     if (!username || !password || !room) {
-      alert("Please fill/select all the details");
+      alert("Please fill all the details");
       return;
     }
 
@@ -29,26 +29,25 @@ export default function LoginPage() {
         body: JSON.stringify({ username, password }),
       });
 
-      
       if (!res.ok) {
         throw new Error(
-          `Server Error: ${res.status}. The server might still be waking up.`,
+          `The server is waking up or busy (Status:${res.status}).`,
         );
       }
       const data = await res.json();
 
       if (data.success) {
-        navigate("/chatroom", { state: { username, room } });
-
         localStorage.setItem("username", username);
         localStorage.setItem("room", room);
         localStorage.setItem("token", data.token);
+
+        navigate("/chatroom", { state: { username, room } });
       } else {
         alert(data.message);
         setDisableLogInAndSignup(false);
       }
     } catch (error) {
-      alert(`connection failed: ${error.message}. server might be down`);
+      alert(`connection failed: ${error.message}`);
       setDisableLogInAndSignup(false);
     }
   };

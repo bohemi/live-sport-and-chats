@@ -30,7 +30,7 @@ function PublicMessage({ sendPublicMessage, getMessages, username }) {
   }
 
   return (
-    <div className="flex flex-col justify-end p-2 gap-2 border-r flex-3">
+    <div className="flex flex-col p-2 gap-2 border-r flex-3 h-100">
       <ul ref={messagesRef} className="flex flex-col gap-1 overflow-y-auto">
         {getMessages.map((data, index) => (
           <li key={index} className="flex justify-between border-b rounded">

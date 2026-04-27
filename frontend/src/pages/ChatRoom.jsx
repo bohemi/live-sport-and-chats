@@ -60,7 +60,7 @@ function ChatRoom() {
   }
 
   return (
-    <div className="flex flex-col w-screen h-screen">
+    <div className="flex flex-col h-screen border">
       <div className=" text-right dropdown dropdown-end">
         <div tabIndex={0} role="button" className="btn m-1">
           Menu
@@ -74,7 +74,10 @@ function ChatRoom() {
           </li>
         </ul>
       </div>
-      <div className="grid h-screen">
+
+      {/* score, message, live users windows */}
+
+      <div className="flex flex-col gap-2">
         <ScoreWindow scoreData={scoreData} />
         <div className="flex border">
           <PublicMessage
@@ -93,7 +96,6 @@ export default ChatRoom;
 
 function handleOpen(socket, username, room) {
   socket.addEventListener("open", function starter() {
-    console.log("Connected!!");
     socket.send(
       JSON.stringify({
         type: "join",
@@ -108,7 +110,7 @@ function handleOpen(socket, username, room) {
 function handleMessage(socket, setStoreMessages, setOnlineUsers, setScoreData) {
   socket.addEventListener("message", (ev) => {
     const data = JSON.parse(ev.data);
-    console.log(data);
+    // console.log(data);
 
     if (data.type && data.username) {
       const message = {

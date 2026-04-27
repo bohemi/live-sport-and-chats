@@ -22,11 +22,11 @@ function ScoreWindow({ scoreData }) {
   };
 
   return (
-    <div className="flex flex-col sm:justify-between border-t p-4">
+    <div className="flex flex-col sm:justify-between border-t p-2">
       <p className="text-xl font-bold mb-4 text-center">Live Cricket</p>
 
       <p className="text-lg text-center font-semibold">{scoreData.match}</p>
-      <div className="grid grid-cols-2 flex flex-col gap-2 pt-2">
+      <div className="grid grid-cols-2 flex flex-col gap-2 pt-2 pb-2">
         {/* team left */}
         <div className="border p-2">
           <p>

@@ -3,12 +3,15 @@ import express from "express";
 import { WebSocketServer } from "ws";
 import mongoose from "mongoose";
 import { randomUUID } from "crypto";
-import { ChatHistory, Users } from "./models/models.js";
-import bcrypt from "bcrypt";
+import { ChatHistory } from "./models/models.js";
 import cors from "cors";
 import jwt from "jsonwebtoken";
 import { getLiveCricketScore } from "./api/fetchScore.js";
 import dotenv from "dotenv";
+import startScoreUpdates from "./services/scoreServices.js";
+import signUp, { login } from "./controller/authController.js";
+import { signupSchema, validate } from "./middleware/validate.js";
+import logger from "./utils/logger.js";
 
 dotenv.config();
 
@@ -28,25 +31,8 @@ let rooms = {
   // basketball: [],
 };
 
-setInterval(async () => {
-  // cricket
-  if (rooms.cricket.length > 0) {
-    console.log("getting live score every 10 seconds");
-    const cricketScore = await getLiveCricketScore(process.env.CRICKET_URL);
-
-    rooms.cricket.forEach((user) => {
-      if (user.socket.readyState === 1) {
-        user.socket.send(
-          JSON.stringify({
-            type: "score",
-            room: "cricket",
-            scoreData: cricketScore,
-          }),
-        );
-      }
-    });
-  }
-}, 10000);
+// fetch scores
+startScoreUpdates(rooms);
 
 wss.on("connection", (client) => {
   client.send(JSON.stringify("From server: Connected!"));
@@ -55,21 +41,23 @@ wss.on("connection", (client) => {
   client.addEventListener("message", async (ev) => {
     const data = JSON.parse(ev.data);
 
-    if (!data.token) {
-      client.send(JSON.stringify({ type: "error", message: "token missing" }));
+    try {
+      if (!data.token) {
+        throw new Error("Token missing");
+      }
+      // verify user token
+      const decoded = jwt.verify(data.token, process.env.JWT_KEY);
+      const username = decoded.username;
+    } catch (error) {
+      logger.error(
+        `failed login attempt: ${error.message} from ${data.username || "unknown"}`,
+      );
+      client.send(
+        JSON.stringify({ type: "error", message: "Invalid Session" }),
+      );
       client.close();
-      return;
     }
-
-    // verify user token
-    const decoded = jwt.verify(data.token, process.env.JWT_KEY);
-    const username = decoded.username;
-
-    if (!username) {
-      client.send(JSON.stringify({ type: "error", message: "Unauthorized" }));
-      client.close();
-      return;
-    }
+    // proceed further if user is valid
 
     // handle joining
     if (data.type == "join") {
@@ -84,8 +72,9 @@ wss.on("connection", (client) => {
 
       rooms[data.room].push(newuser);
       const user = rooms[data.room].find((u) => u.socket === client);
-      console.log("Stored:", user.username, "in", data.room);
-      // ------ storing user detials in their socket ---------
+
+      console.info(`Stored: ${user.username} in ${data.room}`);
+      // ------ storing user details in their socket ---------
       // so we dont have to search every room to find which user left.
       client.user = {
         username: newuser.username,
@@ -114,8 +103,6 @@ wss.on("connection", (client) => {
   });
   // handle disconnection
   client.addEventListener("close", () => {
-    // if the user was sent to close the server before pushing
-    // them into the rooms array
     if (!client.user) {
       return;
     }
@@ -123,7 +110,7 @@ wss.on("connection", (client) => {
       username: client.user.username,
       room: client.user.room,
     };
-    console.log(user.username, "has disconnected");
+    logger.info(`${user.username} has disconnected`);
     const updateRoom = rooms[user.room].filter((u) => u.socket !== client);
     rooms[user.room] = updateRoom;
 
@@ -133,7 +120,7 @@ wss.on("connection", (client) => {
 
 async function handleMessages(user, type, historyChats) {
   if (!user || !type) {
-    console.error("error in handleMessage.", "user:", user, " type:", type);
+    logger.error(`error in handleMessage user: ${user}, " type: ${type}`);
     return;
   }
 
@@ -146,8 +133,6 @@ async function handleMessages(user, type, historyChats) {
       time: user.time,
       onlineUsers: rooms[user.room].map((u) => u.username),
     });
-    // the new user will geet instant live score first
-    sendLiveScoreOnJoining(user);
   }
   if (type == "chat") {
     broadCast({
@@ -220,13 +205,30 @@ function connect(server, uri, port) {
     .then(() => {
       console.log("connected to db");
       server.listen(port, () => {
-        console.log(`connected to port: ${port}`);
+        logger.info(`server successfully started on port: ${port}`);
       });
     })
     .catch((err) => {
-      console.error("connection failed: ", err);
+      logger.error("failed on server connection: ", err);
     });
 }
+
+function getTime() {
+  const time = new Date().toLocaleString().split(" ");
+  return time[1];
+}
+// handle login and signup
+app.post("/signup", validate(signupSchema), signUp);
+app.post("/login", login);
+
+// Global Error Handler Middleware
+app.use((err, req, res, next) => {
+  console.error("Global Error:", err.stack);
+  res.status(500).json({
+    success: false,
+    message: "An internal server error occurred.",
+  });
+});
 
 function mongooseStatus() {
   const db = mongoose.connection;
@@ -259,70 +261,3 @@ function mongooseStatus() {
     console.log("MongoDB connection closed.");
   });
 }
-
-async function sendLiveScoreOnJoining(user) {
-  if (!user) {
-    console.log("error user type");
-    return;
-  }
-  const cricketScore = await getLiveCricketScore(process.env.CRICKET_URL);
-  console.log("sending first instant scores");
-
-  user.socket.send(
-    JSON.stringify({
-      type: "score",
-      room: "cricket",
-      scoreData: cricketScore,
-    }),
-  );
-}
-
-function getTime() {
-  const time = new Date().toLocaleString().split(" ");
-  return time[1];
-}
-
-app.post("/signup", async (req, res) => {
-  const { username, password } = req.body;
-
-  const existingUser = await Users.findOne({ username });
-
-  if (existingUser) {
-    return res.json({ success: false, message: "User exists" });
-  }
-
-  const hashedPassword = await bcrypt.hash(password, 10);
-
-  await Users.create({
-    username,
-    password: hashedPassword,
-  });
-
-  const token = jwt.sign({ username: username }, process.env.JWT_KEY, {
-    expiresIn: "1h",
-  });
-
-  res.json({ success: true, token });
-});
-
-app.post("/login", async (req, res) => {
-  const { username, password } = req.body;
-
-  const user = await Users.findOne({ username });
-
-  if (!user) {
-    return res.json({ success: false, message: "User not found" });
-  }
-
-  const isMatch = await bcrypt.compare(password, user.password);
-
-  if (!isMatch) {
-    return res.json({ success: false, message: "Wrong password" });
-  }
-
-  const token = jwt.sign({ username: user.username }, process.env.JWT_KEY, {
-    expiresIn: "1h",
-  });
-
-  res.json({ success: true, token });
-});
