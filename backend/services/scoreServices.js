@@ -5,7 +5,7 @@ export default function startScoreUpdates(rooms) {
   setInterval(async () => {
     // cricket
     if (rooms.cricket.length > 0) {
-      console.log("getting live score every 10 seconds");
+      logger.info(`getting live score every 10 seconds`);
       try {
         const cricketScore = await getLiveCricketScore(process.env.CRICKET_URL);
 
@@ -23,7 +23,7 @@ export default function startScoreUpdates(rooms) {
           });
         }
       } catch (error) {
-        logger.error("score update failed: ", error);
+        logger.error(`score update failed: ${error}`);
       }
     }
   }, 10000);

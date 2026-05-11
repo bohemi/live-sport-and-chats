@@ -1,6 +1,6 @@
+import { WebSocketServer, WebSocket } from "ws";
 import { createServer } from "http";
 import express from "express";
-import { WebSocketServer } from "ws";
 import mongoose from "mongoose";
 import { randomUUID } from "crypto";
 import { ChatHistory } from "./models/models.js";
@@ -99,7 +99,7 @@ wss.on("connection", (client) => {
   });
   // handle error
   client.addEventListener("error", function clear() {
-    console.log("error--Disconnected from the server");
+    logger.info("error!! Disconnected from the server");
   });
   // handle disconnection
   client.addEventListener("close", () => {
@@ -172,7 +172,7 @@ function broadCast(data) {
       );
     }
   });
-  console.log("current:", rooms.cricket.length);
+  logger.info(`Users Count: ${rooms[data.room].length}`);
 }
 
 function sendPreviousMessages(user, chats) {

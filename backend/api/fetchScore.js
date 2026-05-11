@@ -1,3 +1,5 @@
+import logger from "../utils/logger.js";
+
 export async function getLiveCricketScore(url) {
   try {
     const res = await fetch(url);
@@ -6,7 +8,7 @@ export async function getLiveCricketScore(url) {
     if (!data.data || data.data.length === 0) {
       return null;
     }
-    
+
     const match = data.data[0];
 
     return {
@@ -16,7 +18,7 @@ export async function getLiveCricketScore(url) {
       status: match.status,
     };
   } catch (err) {
-    console.error("Error fetching score:", err);
+    logger.error(`Error fetching score: ${error}`);
     return null;
   }
 }
