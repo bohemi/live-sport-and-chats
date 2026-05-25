@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 
 export default function LoginPage() {
@@ -6,10 +6,31 @@ export default function LoginPage() {
   const [password, setpassword] = useState("");
   const [room, setRoom] = useState("");
   const [disableLogInAndSignup, setDisableLogInAndSignup] = useState(false);
+  const [isServerWarmingUp, setIsServerWarmingUp] = useState(false);
 
   const navigate = useNavigate();
 
   const env = import.meta.env;
+
+  useEffect(() => {
+    const wakeUpServer = async () => {
+      try {
+        // give a 1.5 seconds of window to check if server is already
+        // awake by fetching
+        const timeoutId = setTimeout(() => setIsServerWarmingUp(true), 1500);
+        // if fetch return before 1.5 seconds then the server was awake
+        await fetch(env.VITE_WAKEUP_BACKEND);
+
+        clearTimeout(timeoutId);
+        // server has been awake
+        setIsServerWarmingUp(false);
+      } catch (err) {
+        console.error("Failed to wakeup server", err);
+      }
+    };
+
+    wakeUpServer();
+  }, []);
 
   const handleSubmit = async (ev) => {
     ev.preventDefault();
@@ -76,7 +97,7 @@ export default function LoginPage() {
             placeholder="Password"
           />
 
-          {/* choose room */}
+          {/* choose room selection buttons */}
           <div className="">
             <input
               className="btn"
@@ -87,22 +108,6 @@ export default function LoginPage() {
               required
               onChange={(e) => setRoom(e.target.value)}
             />
-            {/* <input
-              className="btn"
-              type="radio"
-              name="rooms"
-              aria-label="football"
-              value={"football"}
-              onChange={(e) => setRoom(e.target.value)}
-            />
-            <input
-              className="btn"
-              type="radio"
-              name="rooms"
-              aria-label="basketball"
-              value={"basketball"}
-              onChange={(e) => setRoom(e.target.value)}
-            /> */}
           </div>
 
           <button
@@ -124,16 +129,12 @@ export default function LoginPage() {
           </button>
         </fieldset>
       </form>
-      <div className=" mt-2">
-        {disableLogInAndSignup ? (
-          <p className="text-center">
-            Please wait the server might take 10-20 seconds to respond for the
-            first time
-          </p>
-        ) : (
-          ""
-        )}
-      </div>
+
+      {isServerWarmingUp && (
+        <p className="text-center text-amber-500 text-sm animate-pulse mt-2">
+          server is waking up. it may take a liitle longer...
+        </p>
+      )}
     </div>
   );
 }

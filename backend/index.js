@@ -172,7 +172,7 @@ function broadCast(data) {
       );
     }
   });
-  logger.info(`Users Count: ${rooms[data.room].length}`);
+  console.log(`${data.message}`);
 }
 
 function sendPreviousMessages(user, chats) {
@@ -220,6 +220,12 @@ function getTime() {
 // handle login and signup
 app.post("/signup", validate(signupSchema), signUp);
 app.post("/login", login);
+// since render free tier takes time to wake up backend. the request
+// is to wakeup the render.com while user is still typing id
+// and password. it will reuce the time to enter rooms
+app.get("/api/ping", (req, res) => {
+  res.status(200).json({ status: "ok", message: "server is awake" });
+});
 
 // Global Error Handler Middleware
 app.use((err, req, res, next) => {

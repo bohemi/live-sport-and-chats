@@ -2,10 +2,10 @@ import { getLiveCricketScore } from "../api/fetchScore.js";
 import logger from "../utils/logger.js";
 
 export default function startScoreUpdates(rooms) {
+  logger.info(`activating live score interval fetch!`);
   setInterval(async () => {
     // cricket
     if (rooms.cricket.length > 0) {
-      logger.info(`getting live score every 10 seconds`);
       try {
         const cricketScore = await getLiveCricketScore(process.env.CRICKET_URL);
 
@@ -22,9 +22,9 @@ export default function startScoreUpdates(rooms) {
             }
           });
         }
-      } catch (error) {
-        logger.error(`score update failed: ${error}`);
+      } catch (err) {
+        logger.error(`score update failed: ${err.message}`);
       }
     }
-  }, 10000);
+  }, 3000);
 }

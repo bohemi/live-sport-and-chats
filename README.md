@@ -12,16 +12,30 @@ Live Score Integration: Backend-driven score updates pushed to all connected cli
 
 Session Management: Persistent user identification (implemented via JWT) to track active participants in the chat.
 
-🛠️ Tech Stack
-Frontend: React.js, daisyUi, Tailwind CSS.
+Tech Stack
+Frontend: **React.js**, **daisyUi**, **Tailwind CSS**.
 
-Backend: Node.js, Express.js.
+Backend: **Node.js**, **Express.js**.
 
-Real-time Engine: ws (WebSocket library).
+Real-time Engine: **ws** (WebSocket library).
 
-Database: MongoDB (for chat history and user profiles).
+Database: **MongoDB** (for chat history and user profiles).
 
-Security: JWT Authentication & bcrypt.
+Security: **JWT** Authentication & bcrypt, **Zod**.
 
-🏗️ System Architecture
+Performance Optimization: low latency on live cricket scores with caching in **Redis** with a 5-second automatic expiration.
+
+System Architecture
 The application uses a "Full-Duplex" architecture. Unlike standard REST APIs, once a user "Handshakes" with the server, a persistent tunnel is kept open.
+
+## 🛠️ How to Run Locally
+
+You do **not** need to install Node, Nginx, or Redis on your host machine. The entire system is fully orchestrated via Docker.
+
+### Prerequisites
+Ensure you have [Docker](https://docs.docker.com/get-docker/) and [Docker Compose V2](https://docs.docker.com/compose/install/) installed.
+
+### 1. Clone the Repository
+```bash
+git clone [https://github.com/bohemi/live-sport-and-chats.git](https://github.com/bohemi/live-sport-and-chats.git)
+cd live-sport-and-chats

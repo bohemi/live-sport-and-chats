@@ -1,64 +1,65 @@
-function ScoreWindow({ scoreData }) {
-  if (!scoreData || scoreData.length < 1) {
+function ScoreWindow({ matchData }) {
+  if (!matchData || matchData.length < 1) {
     return (
       <div className="border-t p-4 w-full text-center">
-        <h2 className="text-xl font-bold mb-2">Live Cricket</h2>
+        <h2 className="text-xl font-bold mb-2">Match</h2>
         <p>Please wait...</p>
       </div>
     );
   }
-
-  let leftTeam = {
-    inning: scoreData.score[0].inning,
-    run: scoreData.score[0].r,
-    wicket: scoreData.score[0].w,
-    over: scoreData.score[0].o,
+  // to do----------change to states------------
+  
+  let firstTeam = {
+    inning: matchData.teamOne?.inning || "no updates",
+    run: matchData.teamOne?.r || "no updates",
+    wicket: matchData.teamOne?.w || "no updates",
+    over: matchData.teamOne?.o || "no updates",
   };
-  let rightTeam = {
-    inning: scoreData.score[1].inning,
-    run: scoreData.score[1].r,
-    wicket: scoreData.score[1].w,
-    over: scoreData.score[1].o,
+  let secondTeam = {
+    inning: matchData.teamTwo?.inning || "no updates",
+    run: matchData.teamTwo?.r || "no updates",
+    wicket: matchData.teamTwo?.w || "no updates",
+    over: matchData.teamTwo?.o || "no updates",
   };
 
   return (
     <div className="flex flex-col sm:justify-between border-t p-2">
-      <p className="text-xl font-bold mb-4 text-center">Live Cricket</p>
+      <p className="text-xl font-bold mb-4 text-center">Match</p>
 
-      <p className="text-lg text-center font-semibold">{scoreData.match}</p>
+      <p className="text-lg text-center font-semibold">{matchData.matchName || "Match"}</p>
       <div className="grid grid-cols-2 flex flex-col gap-2 pt-2 pb-2">
         {/* team left */}
         <div className="border p-2">
           <p>
-            <strong>Ining:</strong> {leftTeam.inning}
+            <strong>Ining:</strong> {firstTeam.inning || ""}
           </p>
           <p>
-            <strong>Run:</strong> {leftTeam.run}
+            <strong>Run:</strong> {firstTeam.run || ""}
           </p>
           <p>
-            <strong>Wicket:</strong> {leftTeam.wicket}
+            <strong>Wicket:</strong> {firstTeam.wicket || ""}
           </p>
           <p>
-            <strong>Over:</strong> {leftTeam.over}
+            <strong>Over:</strong> {firstTeam.over || ""}
           </p>
         </div>
         {/* team right */}
         <div className="border p-2">
           <p>
-            <strong>Ining:</strong> {rightTeam.inning}
+            <strong>Ining:</strong> {secondTeam.inning || ""}
           </p>
           <p>
-            <strong>Run:</strong> {rightTeam.run}
+            <strong>Run:</strong> {secondTeam.run || ""}
           </p>
           <p>
-            <strong>Wicket:</strong> {rightTeam.wicket}
+            <strong>Wicket:</strong> {secondTeam.wicket || ""}
           </p>
           <p>
-            <strong>Over:</strong> {rightTeam.over}
+            <strong>Over:</strong> {secondTeam.over || ""}
           </p>
         </div>
       </div>
-      <p className="text-center border">Status: {scoreData.status || "Live"}</p>
+      <p className="text-center border">Status: {matchData.status || "Live"}</p>
     </div>
   );
 }

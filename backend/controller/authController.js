@@ -8,7 +8,10 @@ export default async function signUp(req, res) {
   const existingUser = await Users.findOne({ username });
 
   if (existingUser) {
-    return res.json({ success: false, message: "User exists" });
+    return res.json({
+      success: false,
+      message: "User already exists please login",
+    });
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);

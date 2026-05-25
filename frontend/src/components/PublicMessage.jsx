@@ -30,12 +30,12 @@ function PublicMessage({ sendPublicMessage, getMessages, username }) {
   }
 
   return (
-    <div className="flex flex-col p-2 gap-2 border-r flex-3 h-100">
+    <div className="flex flex-col p-2 gap-2 border-r flex-3 h-80">
       <ul ref={messagesRef} className="flex flex-col gap-1 overflow-y-auto">
         {getMessages.map((data, index) => (
           <li key={index} className="flex justify-between border-b rounded">
             {data.type == "join" ? (
-              <p>{data.message}</p>
+              <p className="text-green-500">{data.message}</p>
             ) : (
               <p>
                 {data.username == username ? "You" : data.username}:{" "}

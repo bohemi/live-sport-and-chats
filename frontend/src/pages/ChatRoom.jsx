@@ -7,7 +7,7 @@ import LiveWindow from "../components/LiveWindow";
 function ChatRoom() {
   const [storeMessages, setStoreMessages] = useState([]);
   const [onlineUsers, setOnlineUsers] = useState([]);
-  const [scoreData, setScoreData] = useState([]);
+  const [matchData, setMatchData] = useState([]);
 
   const env = import.meta.env;
 
@@ -30,7 +30,7 @@ function ChatRoom() {
       socket,
       setStoreMessages,
       setOnlineUsers,
-      setScoreData,
+      setMatchData,
     );
     socket.onerror = handleError(socket);
     socket.onclose = handleClose(socket);
@@ -60,7 +60,7 @@ function ChatRoom() {
   }
 
   return (
-    <div className="flex flex-col h-screen border">
+    <div className="flex flex-col border">
       <div className=" text-right dropdown dropdown-end">
         <div tabIndex={0} role="button" className="btn m-1">
           Menu
@@ -78,7 +78,7 @@ function ChatRoom() {
       {/* score, message, live users windows */}
 
       <div className="flex flex-col gap-2">
-        <ScoreWindow scoreData={scoreData} />
+        <ScoreWindow matchData={matchData} />
         <div className="flex border">
           <PublicMessage
             sendPublicMessage={handleSendPublicMessage}

@@ -4,18 +4,18 @@ import z from "zod";
 // and password length
 export const signupSchema = z.object({
   username: z.string().min(3).max(20).trim(),
-  password: z.string().min(6),
+  password: z.string().min(5),
 });
 
 export const validate = (schema) => (req, res, next) => {
   const result = schema.safeParse(req.body);
+  console.log("ress",result)
   if (!result.success) {
     return res.status(400).json({
       success: false,
-      errors: result.error.errors.map((e) => e.message),
+      errors: result.error
     });
   }
-  // if everything alright then move towards next line in the
-  // signup function
+  // if okay move towards next line in the signup function
   next();
 };
